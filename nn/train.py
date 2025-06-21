@@ -138,7 +138,9 @@ class Trainer(object):
             return dataloader.batch_sampler.sampler
         
         return None
-    @track_emissions
+
+    # uncomment this to track emissions
+    # @track_emissions 
     def fit(self, num_epochs, device,  early_stopping=None, start_epoch=0, best='loss', conf=False):
         """
         Fits the model for the given number of epochs.

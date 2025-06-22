@@ -20,6 +20,16 @@ training was done in a multi-gpu slurm-based environemnt with. To run experiment
 all experiments can be found in [src](https://github.com/IlayMalinyak/DESA/tree/main/src)
 folder.
 
+## Pretrained Models
+
+We provide three pretrained models on the Hugging Face model hub for easy access. Each model includes weights (.pth), configuration (yaml), and additional resources. Model details and downloads are below.
+
+| Model Name | Description | # Params. | Download |
+|------------|-------------|-----------|----------|
+| DESA | full model | [545]M | [🤗 Hub](https://huggingface.co/Ilayk\DESA) |
+| spectra encoder | pre trained spectra encoder | [522]M | [🤗 Hub](https://huggingface.co/Ilayk/spectra_encoder) |
+| light curve encoder | pre trained light curve encoder | [11]M | [🤗 Hub](https://huggingface.co/Ilayk/lc_encoder) |
+
 ## Results
 
 ![umap](images/compare_umaps_flag_CMD_numeric.png)

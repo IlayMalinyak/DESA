@@ -38,9 +38,11 @@ After downloading the .pth files, you will need to update the [full config](http
     local_rank, world_size, gpus_per_node = setup()
     args_dir = '/data/DESA/nn/full_config.yaml'
     data_args = Container(**yaml.safe_load(open(args_dir, 'r'))['Data'])
-    # a function the create a dataframe of data samples
     def create_train_test_dfs(params):
-        ...
+        pass
+        # this should be a function that creates a dataframe of data samples
+
+    
     train_dataset, val_dataset, test_dataset, complete_config = generator.get_data(data_args,
                                                     data_generation_fn=create_train_test_dfs,
                                                     dataset_name='LightSpec')

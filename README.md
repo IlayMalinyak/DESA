@@ -36,7 +36,7 @@ After downloading the .pth files, you will need to update the [full config](http
     import generator
     from util.utils import Container
     local_rank, world_size, gpus_per_node = setup()
-    args_dir = '/data/DESA/nn/full_config.yaml'
+    args_dir = 'DESA/nn/full_config.yaml'
     data_args = Container(**yaml.safe_load(open(args_dir, 'r'))['Data'])
     def create_train_test_dfs(params):
         pass

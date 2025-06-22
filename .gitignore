@@ -1,8 +1,3 @@
-# Ignore all .png files
-*.png
-
-# Ignore all .jpg files
-*.jpg
 
 # Ignore all .fits files
 *.fits
@@ -13,8 +8,6 @@
 # Ignore al .pyc files
 *.pyc 
 
-# Ignore the images folder
-images/
 
 # Ignore the experiments folder
 experiments/

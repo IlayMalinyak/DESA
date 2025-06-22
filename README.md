@@ -26,7 +26,7 @@ We provide three pretrained models on the Hugging Face model hub for easy access
 
 | Model Name | Description | # Params. | Download |
 |------------|-------------|-----------|----------|
-| DESA | full model | [545]M | [🤗 Hub](https://huggingface.co/Ilayk\DESA) |
+| DESA | full model | [545]M | [🤗 HF Hub](https://huggingface.co/Ilayk/DESA) |
 | spectra encoder | pre trained spectra encoder | [522]M | [🤗 Hub](https://huggingface.co/Ilayk/spectra_encoder) |
 | light curve encoder | pre trained light curve encoder | [11]M | [🤗 Hub](https://huggingface.co/Ilayk/lc_encoder) |
 

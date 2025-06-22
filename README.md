@@ -30,15 +30,15 @@ We provide three pretrained models on the Hugging Face model hub for easy access
 | spectra encoder | pre trained spectra encoder | [522]M | [🤗 HF Hub](https://huggingface.co/Ilayk/spectra_encoder) |
 | light curve encoder | pre trained light curve encoder | [11]M | [🤗 HF Hub](https://huggingface.co/Ilayk/lc_encoder) |
 
-# loading the pretrained models
+### Loading the Pretrained Models
 After downloading the .pth files, you will need to update the full config ([config](https://github.com/IlayMalinyak/DESA/tree/main/nn/full_config.yaml)) with the correct paths and hyperparameters. Then you can load them using the get_model function:
-```python
-import generator
-desa_model, optim_args, tuner_args, complete_config, lc_model, spec_model = generator.get_model(data_args,
-                                                                                    args_dir,
-                                                                                    complete_config,
-                                                                                    local_rank,
-                                                                                    )
+
+    import generator
+    desa_model, optim_args, tuner_args, complete_config, lc_model, spec_model = generator.get_model(data_args,
+                                                                                        args_dir,
+                                                                                        complete_config,
+                                                                                        local_rank,
+                                                                                        )
 ## Results
 
 ![umap](images/compare_umaps_flag_CMD_numeric.png)

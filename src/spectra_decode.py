@@ -46,175 +46,16 @@ models = {'CNNEncoderDecoder': CNNEncoderDecoder, 'AstroEncoderDecoder': AstroEn
 
 prediction_labels = ['teff', 'logg', 'feh']
           
-# schedulers = {'WarmupScheduler': WarmupScheduler, 'OneCycleLR': OneCycleLR,
-#  'CosineAnnealingLR': CosineAnnealingLR, 'none': None}
 
 current_date = datetime.date.today().strftime("%Y-%m-%d")
 datetime_dir = f"spec_decode2_{current_date}"
 
-def plot_joint_prob(lamost_catalog):
-    # Create a multi-panel figure to show different views of the distribution
-    fig = plt.figure(figsize=(18, 15))
-    plt.subplots_adjust(wspace=0.4, hspace=0.4)
-    
-    # 1. Pairwise 2D plots - using scatter plots with color indicating the joint probability
-    ax1 = fig.add_subplot(2, 2, 1)
-    scatter = ax1.scatter(lamost_catalog['combined_teff'], 
-                          lamost_catalog['combined_logg'], 
-                          c=lamost_catalog['joint_prob'], 
-                          s=3, alpha=0.7, 
-                          cmap='viridis_r')  # viridis_r to have rare (low prob) be yellow
-    ax1.set_xlabel('Effective Temperature (K)')
-    ax1.set_ylabel('Surface Gravity (log g)')
-    ax1.set_title('Joint Probability: Teff vs logg')
-    plt.colorbar(scatter, ax=ax1, label='Probability')
-    
-    ax2 = fig.add_subplot(2, 2, 2)
-    scatter = ax2.scatter(lamost_catalog['combined_teff'], 
-                          lamost_catalog['combined_feh'], 
-                          c=lamost_catalog['joint_prob'], 
-                          s=3, alpha=0.7, 
-                          cmap='viridis_r')
-    ax2.set_xlabel('Effective Temperature (K)')
-    ax2.set_ylabel('Metallicity [Fe/H]')
-    ax2.set_title('Joint Probability: Teff vs [Fe/H]')
-    plt.colorbar(scatter, ax=ax2, label='Probability')
-    
-    ax3 = fig.add_subplot(2, 2, 3)
-    scatter = ax3.scatter(lamost_catalog['combined_logg'], 
-                          lamost_catalog['combined_feh'], 
-                          c=lamost_catalog['joint_prob'], 
-                          s=3, alpha=0.7, 
-                          cmap='viridis_r')
-    ax3.set_xlabel('Surface Gravity (log g)')
-    ax3.set_ylabel('Metallicity [Fe/H]')
-    ax3.set_title('Joint Probability: logg vs [Fe/H]')
-    plt.colorbar(scatter, ax=ax3, label='Probability')
-    
-    # 2. 3D scatter plot with color indicating probability
-    ax4 = fig.add_subplot(2, 2, 4, projection='3d')
-    scatter = ax4.scatter(lamost_catalog['combined_teff'], 
-                          lamost_catalog['combined_logg'], 
-                          lamost_catalog['combined_feh'], 
-                          c=lamost_catalog['joint_prob'], 
-                          s=3, alpha=0.7, 
-                          cmap='viridis_r')
-    ax4.set_xlabel('Teff (K)')
-    ax4.set_ylabel('log g')
-    ax4.set_zlabel('[Fe/H]')
-    ax4.set_title('3D Joint Probability Distribution')
-    
-    plt.suptitle('Joint Probability Distribution of Stellar Parameters', fontsize=16)
-    plt.tight_layout(rect=[0, 0, 1, 0.96])  # Adjust for the suptitle
-    plt.savefig('/data/DESA/images/lamost_joint_prob.png', dpi=300, bbox_inches='tight')
-    print("Joint probability visualization saved to /data/DESA/images/lamost_joint_prob.png")
-    
-    # Create a second visualization showing the weights (inverse probabilities)
-    fig2 = plt.figure(figsize=(18, 15))
-    plt.subplots_adjust(wspace=0.4, hspace=0.4)
-    
-    ax1 = fig2.add_subplot(2, 2, 1)
-    scatter = ax1.scatter(lamost_catalog['combined_teff'], 
-                          lamost_catalog['combined_logg'], 
-                          c=lamost_catalog['joint_weight'], 
-                          s=3, alpha=0.7, 
-                          cmap='plasma',
-                          norm=mpl.colors.LogNorm())  # Log scale for weights
-    ax1.set_xlabel('Effective Temperature (K)')
-    ax1.set_ylabel('Surface Gravity (log g)')
-    ax1.set_title('Joint Weights: Teff vs logg')
-    plt.colorbar(scatter, ax=ax1, label='Weight (1/prob)')
-    
-    ax2 = fig2.add_subplot(2, 2, 2)
-    scatter = ax2.scatter(lamost_catalog['combined_teff'], 
-                          lamost_catalog['combined_feh'], 
-                          c=lamost_catalog['joint_weight'], 
-                          s=3, alpha=0.7, 
-                          cmap='plasma',
-                          norm=mpl.colors.LogNorm())
-    ax2.set_xlabel('Effective Temperature (K)')
-    ax2.set_ylabel('Metallicity [Fe/H]')
-    ax2.set_title('Joint Weights: Teff vs [Fe/H]')
-    plt.colorbar(scatter, ax=ax2, label='Weight (1/prob)')
-    
-    ax3 = fig2.add_subplot(2, 2, 3)
-    scatter = ax3.scatter(lamost_catalog['combined_logg'], 
-                          lamost_catalog['combined_feh'], 
-                          c=lamost_catalog['joint_weight'], 
-                          s=3, alpha=0.7, 
-                          cmap='plasma',
-                          norm=mpl.colors.LogNorm())
-    ax3.set_xlabel('Surface Gravity (log g)')
-    ax3.set_ylabel('Metallicity [Fe/H]')
-    ax3.set_title('Joint Weights: logg vs [Fe/H]')
-    plt.colorbar(scatter, ax=ax3, label='Weight (1/prob)')
-    
-    # 3D scatter with weights
-    ax4 = fig2.add_subplot(2, 2, 4, projection='3d')
-    scatter = ax4.scatter(lamost_catalog['combined_teff'], 
-                          lamost_catalog['combined_logg'], 
-                          lamost_catalog['combined_feh'], 
-                          c=lamost_catalog['joint_weight'], 
-                          s=3, alpha=0.7, 
-                          cmap='plasma',
-                          norm=mpl.colors.LogNorm())
-    ax4.set_xlabel('Teff (K)')
-    ax4.set_ylabel('log g')
-    ax4.set_zlabel('[Fe/H]')
-    ax4.set_title('3D Joint Weight Distribution')
-    
-    plt.suptitle('Joint Weight Distribution of Stellar Parameters', fontsize=16)
-    plt.tight_layout(rect=[0, 0, 1, 0.96])  # Adjust for the suptitle
-    plt.savefig('/data/DESA/images/lamost_joint_weight.png', dpi=300, bbox_inches='tight')
-    print("Joint weight visualization saved to /data/DESA/images/lamost_joint_weight.png")
-    
-    # Also create a 2D histogram of the most important pairwise relationships
-    fig3, axes = plt.subplots(1, 3, figsize=(18, 6))
-    
-    # Teff vs logg
-    h = axes[0].hist2d(lamost_catalog['combined_teff'], 
-                  lamost_catalog['combined_logg'], 
-                  bins=(20, 20), 
-                  cmap='viridis')
-    axes[0].set_xlabel('Effective Temperature (K)')
-    axes[0].set_ylabel('Surface Gravity (log g)')
-    axes[0].set_title('Density: Teff vs logg')
-    plt.colorbar(h[3], ax=axes[0], label='Count')
-    
-    # Teff vs FeH
-    h = axes[1].hist2d(lamost_catalog['combined_teff'], 
-                  lamost_catalog['combined_feh'], 
-                  bins=(20, 20), 
-                  cmap='viridis')
-    axes[1].set_xlabel('Effective Temperature (K)')
-    axes[1].set_ylabel('Metallicity [Fe/H]')
-    axes[1].set_title('Density: Teff vs [Fe/H]')
-    plt.colorbar(h[3], ax=axes[1], label='Count')
-    
-    # logg vs FeH
-    h = axes[2].hist2d(lamost_catalog['combined_logg'], 
-                  lamost_catalog['combined_feh'], 
-                  bins=(20, 20), 
-                  cmap='viridis')
-    axes[2].set_xlabel('Surface Gravity (log g)')
-    axes[2].set_ylabel('Metallicity [Fe/H]')
-    axes[2].set_title('Density: logg vs [Fe/H]')
-    plt.colorbar(h[3], ax=axes[2], label='Count')
-    
-    plt.suptitle('2D Histograms of Stellar Parameters', fontsize=16)
-    plt.tight_layout(rect=[0, 0, 1, 0.94])
-    plt.savefig('/data/DESA/images/lamost_2d_histograms.png', dpi=300, bbox_inches='tight')
-    print("2D histograms saved to /data/DESA/images/lamost_2d_histograms.png")
-    
-    plt.close('all')  # Close all figures to free memory
 
 def test_dataset_samples(dataset, num_iters=100):
     start_time = time.time()
     for i in range(num_iters):
         x_masked, x, y, mask, _, info = dataset[i]
-        # print('y: ', len(y))
-        # if 'rv2' in info.keys():
-        #     print(info['snrg'], info['snri'], info['snrr'], info['snrz'])
+        
     print(f"Time taken for {num_iters} iterations: {time.time() - start_time:.4f} seconds." \
         f"avg per iteration: {(time.time() - start_time)/num_iters:.6f} seconds")
 
@@ -225,42 +66,7 @@ def create_train_test_dfs(meta_columns):
     lamost_catalog = lamost_catalog.dropna(subset=['combined_teff', 'combined_logg', 'combined_feh'])
     print("values ranges: ")
     for c in ['combined_teff', 'combined_logg', 'combined_feh']:
-        print(c, lamost_catalog[c].min(), lamost_catalog[c].max())
-    
-    # Calculate joint probability distribution for target variables
-    # First, bin the continuous values to create discrete categories
-    num_bins = 200  # Adjust number of bins as needed
-    
-    # Create bins for each variable
-    teff_bins = pd.cut(lamost_catalog['combined_teff'], bins=num_bins, labels=False)
-    logg_bins = pd.cut(lamost_catalog['combined_logg'], bins=num_bins, labels=False)
-    feh_bins = pd.cut(lamost_catalog['combined_feh'], bins=num_bins, labels=False)
-    
-    # Combine bins to create joint categories
-    lamost_catalog['joint_bin'] = teff_bins.astype(str) + '_' + logg_bins.astype(str) + '_' + feh_bins.astype(str)
-    
-    # Calculate joint probability
-    joint_counts = lamost_catalog['joint_bin'].value_counts()
-    total_samples = len(lamost_catalog)
-    joint_probs = joint_counts / total_samples
-    
-    # Assign probabilities back to the dataframe
-    lamost_catalog['joint_prob'] = lamost_catalog['joint_bin'].map(joint_probs)
-    
-    # Calculate inverse probability for weighting (rare combinations get higher weights)
-    lamost_catalog['joint_weight'] = 1.0 / lamost_catalog['joint_prob']
-    
-    # Normalize weights to have mean = 1.0
-    mean_weight = lamost_catalog['joint_weight'].mean()
-    lamost_catalog['joint_weight'] = lamost_catalog['joint_weight'] / mean_weight
-    
-    # Print some statistics about the joint distribution
-    print(f"Number of unique joint bins: {len(joint_probs)}")
-    print(f"Min joint probability: {lamost_catalog['joint_prob'].min():.6f}")
-    print(f"Max joint probability: {lamost_catalog['joint_prob'].max():.6f}")
-    print(f"Min weight: {lamost_catalog['joint_weight'].min():.2f}")
-    print(f"Max weight: {lamost_catalog['joint_weight'].max():.2f}")
-
+        print(c, lamost_catalog[c].min(), lamost_catalog[c].max())  
     
     train_df, test_df = train_test_split(lamost_catalog, test_size=0.2, random_state=1234)
     return train_df, test_df
@@ -373,11 +179,6 @@ with open(output_filename, "w") as f:
 fig, axes = plot_fit(fit_res, legend=exp_num, train_test_overlay=True)
 plt.savefig(f"{data_args.log_dir}/{datetime_dir}/fit_{model_name}_spectra_decode_{exp_num}.png")
 plt.clf()
-
-# predict_results(trainer, val_dataloader, test_dataloader, loss_fn,
-#                  data_args.prediction_labels_lc,
-#                  data_args, optim_args, 'light', exp_num,
-#                   datetime_dir, local_rank, world_size)
 
 preds_val, targets_val, info = trainer.predict(val_dataloader, device=local_rank)
 

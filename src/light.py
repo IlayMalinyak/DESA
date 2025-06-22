@@ -197,19 +197,6 @@ total_steps = int(data_args.num_epochs) * len(train_dataloader)
 scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer,
                                                     T_max=total_steps,
                                                     eta_min=float(optim_args.max_lr)/10)
-# scheduler = OneCycleLR(
-#         optimizer,
-#         max_lr=float(optim_args.max_lr),
-#         epochs= int(data_args.num_epochs),
-#         steps_per_epoch = len(train_dataloader),
-#         pct_start=float(optim_args.warmup_pct),
-#         anneal_strategy='cos',
-#         cycle_momentum=True,
-#         base_momentum=0.85,
-#         max_momentum=0.95,
-#         div_factor=10.0,
-#         final_div_factor=100.0
-#     )
 
 
 trainer = ContrastiveTrainer(model=model, optimizer=optimizer,

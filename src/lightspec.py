@@ -65,10 +65,7 @@ def predict_and_save_dl(dl, local_rank, name, trainer):
     print("shapes of predictions: ", targets.shape, kids.shape, eigenvalues.shape, eigenvectors.shape, embs_projections.shape, final_features.shape)
 
     df = pd.DataFrame({'kid': kids})
-    # top_k = top_idx_comb.shape[1]
-    # for i in range(1, top_k + 1):
-    #     df[f'top_idx_comb_{i}'] = top_idx_comb[:, i - 1]
-    #     df[f'top_values_comb_{i}'] = top_values_comb[:, i - 1]
+    
     
     # Save rank-specific CSV file for data predictions
     df.to_csv(f"{data_args.log_dir}/{datetime_dir}/preds_{exp_num}_{name}_{rank}.csv", index=False)
@@ -174,9 +171,7 @@ def create_train_test_dfs(meta_columns, only_main_seq=True):
     lamost_kepler_df['main_seq'] = lamost_kepler_df.apply(giant_cond, axis=1)
     if only_main_seq:
         lamost_kepler_df = lamost_kepler_df[lamost_kepler_df['main_seq']==True]
-    # else:
-    #     lamost_kepler_df = lamost_kepler_df[lamost_kepler_df['main_seq']==False]
-    # lamost_kepler_df = lamost_kepler_df.dropna(subset=norm_cols)
+    
     train_df, val_df  = train_test_split(lamost_kepler_df, test_size=0.2, random_state=42)
     print("number of samples kepler: ", len(kepler_df),
       " lamost-kepler :", len(lamost_kepler_df), 'unique kepler ', len(lamost_kepler_df.drop_duplicates('KID')))
@@ -192,10 +187,7 @@ def test_dataset_samples(ds, num_iters=10):
     start_time = time.time()
     for i in range(num_iters):
         light, spec, y,light2, spec2,info = ds[i]
-        # print(light.shape, spec.shape, light2.shape, spec2.shape, y)
-        # if light.sum() == 0:
-        #     no_founds += 1
-        # # print(light.shape, spec.shape, w.shape, info.keys())
+        
         if i % 10 == 0:
             fig, axes = plt.subplots(1,2, figsize=(24,14))
             axes[0].plot(light[0].cpu().numpy())
@@ -287,20 +279,6 @@ if __name__ == "__main__":
     num_params_all = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print(f"Number of trainble parameters in full model: {num_params_all}")
 
-    # batch = next(iter(train_dataloader))
-    # lc1, spec1, lc2, spec2, y, info = batch
-
-    # A = model.module.dual_former.projection_head
-    # eigevals, egivec, topk = analyze_eigenspace_projections(A, batch)
-
-    # print(eigvals.shape, eigvecs.shape, topk.shape)
-
-    # exit()
-
-    # output = model(lc1, spec1)
-    # print("output keys: ", output.keys())
-    # print(output['lc_pred'].shape, output['spectra_pred'].shape, output['dual_pred'][0].shape, output['dual_pred'][1].shape)
-    # exit()
 
     if data_args.approach == 'ssl':
         loss_fn = None
@@ -352,16 +330,6 @@ if __name__ == "__main__":
                             use_pred_coeff=True, pred_coeff_val=data_args.pred_coeff_val,
                             exp_name=f"{exp_num}") 
     
-    # elif data_args.approach == 'jepa':
-    #     trainer = JEPATrainer(
-    #                             model=model, optimizer=optimizer,
-    #                             criterion=loss_fn, output_dim=len(data_args.prediction_labels_lightspec),
-    #                             train_dataloader=train_dataloader,
-    #                         val_dataloader=val_dataloader, device=local_rank, num_quantiles=len(optim_args.quantiles),
-    #                                 exp_num=datetime_dir, log_path=data_args.log_dir, alpha=data_args.alpha,
-    #                                 accumulation_step=accumulation_step, max_iter=np.inf, use_y_as_latent=data_args.use_latent,
-    #                             exp_name=f"{exp_num}"
-    #                             )
 
     complete_config.update(
         {"trainer": trainer.__dict__,

@@ -31,7 +31,7 @@ We provide three pretrained models on the Hugging Face model hub for easy access
 | light curve encoder | pre trained light curve encoder | [11]M | [🤗 HF Hub](https://huggingface.co/Ilayk/lc_encoder) |
 
 ### Loading the Pretrained Models
-After downloading the .pth files, you will need to update the full ([config](https://github.com/IlayMalinyak/DESA/tree/main/nn/full_config.yaml)) with the correct paths and hyperparameters. Then you can load them using the get_model function:
+After downloading the .pth files, you will need to update the [full config](https://github.com/IlayMalinyak/DESA/tree/main/nn/full_config.yaml) with the correct paths and hyperparameters. Then you can load them using the get_model function:
 
     import generator
     desa_model, optim_args, tuner_args, complete_config, lc_model, spec_model = generator.get_model(data_args,

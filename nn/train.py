@@ -318,7 +318,7 @@ class Trainer(object):
             train_loss.append(loss.item())
             all_accs = all_accs + acc
             total += len(y)
-            pbar.set_description(f"train_acc: {acc}, train_loss:  {loss.item():.4f}")      
+            pbar.set_description(f"train_acc: {acc}, train_loss:  {loss.item():.7f}")      
             if i > self.max_iter:
                 break
         print("number of train_accs: ", all_accs, "total: ", total)
@@ -785,16 +785,7 @@ class DualFormerTrainer(Trainer):
 
         dual_pred = out['dual_pred']
 
-        # dual_pred_lc, dual_pred_spec = dual_pred['pred1'], dual_pred['pred2']
-        # if out['lc_pred'] is not None:
-        # pred_lc = dual_pred['pred1'].view(lc.shape[0], -1, self.num_quantiles).squeeze(-1)
-        # pred_spec = dual_pred['pred2'].view(lc.shape[0], -1, self.num_quantiles).squeeze(-1)
-        # lc_loss = self.criterion(pred_lc, y)
-        # spec_loss = self.criterion(pred_spec, y)
-        # lc_loss = lc_loss.nan_to_num(0).mean(0).mean()
-        # spec_loss = spec_loss.nan_to_num(0).mean(0).mean()
-        # reg_loss = lc_loss + spec_loss
-        # else:
+        
         reg_loss = lc_loss = spec_loss = torch.tensor([0], device=device)
         self.alpha = 0
         
@@ -816,11 +807,7 @@ class DualFormerTrainer(Trainer):
         
         self.train_aux_loss_1.append(reg_loss.item())
         self.train_aux_loss_2.append(duality_loss.item())
-        # if out['lc_pred'] is not None:
-        # acc1 = (torch.abs(pred_lc - y) < y * 0.1).sum(0)
-        # acc2 = (torch.abs(pred_spec - y) < y * 0.1).sum(0)
-        # acc = (acc1 + acc2) / 2
-        # else:
+        
         acc = torch.tensor([0], device=device)
         return loss, acc, y
     def eval_batch(self,batch, batch_idx, device):
@@ -832,16 +819,7 @@ class DualFormerTrainer(Trainer):
         
         dual_pred = out['dual_pred']
 
-        # dual_pred_lc, dual_pred_spec = dual_pred['pred1'], dual_pred['pred2']
-        # if out['lc_pred'] is not None:
-        # pred_lc = dual_pred['pred1'].view(lc.shape[0], -1, self.num_quantiles).squeeze(-1)
-        # pred_spec = dual_pred['pred2'].view(lc.shape[0], -1, self.num_quantiles).squeeze(-1)
-        # lc_loss = self.criterion(pred_lc, y)
-        # spec_loss = self.criterion(pred_spec, y)
-        # lc_loss = lc_loss.nan_to_num(0).mean(0).mean()
-        # spec_loss = spec_loss.nan_to_num(0).mean(0).mean()
-        # reg_loss = lc_loss + spec_loss
-        # else:
+        
         reg_loss = lc_loss = spec_loss = torch.tensor([0], device=device)
         self.alpha = 0
             
@@ -853,11 +831,7 @@ class DualFormerTrainer(Trainer):
         loss = reg_loss * self.alpha + duality_loss * (1 - self.alpha) / 2 + cov_loss * (1 - self.alpha) / 2 
         if batch_idx % self.print_every == 0:
             print('separate losses - ', lc_loss.item(), spec_loss.item(), duality_loss.item(), cov_loss.item())
-        # if out['lc_pred'] is not None:
-        # acc1 = (torch.abs(pred_lc - y) < y * 0.1).sum(0)
-        # acc2 = (torch.abs(pred_spec - y) < y * 0.1).sum(0)
-        # acc = (acc1 + acc2) / 2
-        # else:
+        
         acc = torch.tensor([0], device=device)
         return loss, acc, y
     

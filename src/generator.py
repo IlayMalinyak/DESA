@@ -214,10 +214,9 @@ def get_model(data_args,
     astroconformer_args_lc = Container(**yaml.safe_load(open(args_dir, 'r'))['AstroConformer_lc'])
     cnn_args_lc = Container(**yaml.safe_load(open(args_dir, 'r'))['CNNEncoder_lc'])
     simsiam_args = Container(**yaml.safe_load(open(args_dir, 'r'))['MultiModalSimSiam'])
-    # lstm_args_lc = Container(**yaml.safe_load(open(args_dir, 'r'))['LSTMEncoder_lc'])
-    lightspec_args = Container(**yaml.safe_load(open(args_dir, 'r'))['MultiEncoder_lightspec'])
+    # lightspec_args = Container(**yaml.safe_load(open(args_dir, 'r'))['MultiEncoder_lightspec'])
     transformer_args_lightspec = Container(**yaml.safe_load(open(args_dir, 'r'))['Transformer_lightspec'])
-    transformer_args_jepa = Container(**yaml.safe_load(open(args_dir, 'r'))['Transformer_jepa'])
+    # transformer_args_jepa = Container(**yaml.safe_load(open(args_dir, 'r'))['Transformer_jepa'])
     dual_former_args = Container(**yaml.safe_load(open(args_dir, 'r'))['dual_former'])
     projector_args = Container(**yaml.safe_load(open(args_dir, 'r'))['projector'])
     predictor_args = Container(**yaml.safe_load(open(args_dir, 'r'))['predictor'])
@@ -231,12 +230,7 @@ def get_model(data_args,
     dual_former_args.latent_dim = latent_dim
     print("latent dim: ", latent_dim)
 
-    # tuner_args.out_dim = len(data_args.prediction_labels_finetune) * len(optim_args.quantiles)
-    # light_model_args.in_channels = data_args.in_channels_lc
-    # predictor_args.w_dim = len(data_args.meta_columns_lightspec)
-    # lstm_args_lc.seq_len = int(data_args.max_len_lc)
     light_encoder1 = CNNEncoder(cnn_args_lc)
-    # light_encoder1 = LSTMEncoder(lstm_args_lc)
     light_encoder2 = Astroconformer(astroconformer_args_lc)
     deepnorm_init(light_encoder2, astroconformer_args_lc)
     light_backbone = DoubleInputRegressor(light_encoder1, light_encoder2, light_model_args)
@@ -250,9 +244,6 @@ def get_model(data_args,
 
     spec_model = MODELS[spec_model_name](spec_model_args, conformer_args=conformer_args_spec)
     
-    # # Apply DeepNorm initialization to the spectra model
-    # deepnorm_init(spec_model, conformer_args_spec)
-    
     spec_model = init_model(spec_model, spec_model_args)
 
     num_params_spec_all = sum(p.numel() for p in spec_model.parameters() if p.requires_grad)
@@ -265,12 +256,13 @@ def get_model(data_args,
 
 
 
-    # Commenting out JEPA code
+    if data_args.approach == 'dual_former':
+        optim_args.quantiles = [0.5]
     lc_reg_args = predictor_args.get_dict().copy()
+    spectra_reg_args = predictor_args.get_dict().copy()
     lc_reg_args['in_dim'] = light_model.simsiam.encoder.output_dim
     lc_reg_args['out_dim'] = len(data_args.prediction_labels_lc) * len(optim_args.quantiles)
     lc_reg_args['w_dim'] = 0
-    spectra_reg_args = predictor_args.get_dict().copy()
     spectra_reg_args['in_dim'] = spec_model.encoder.output_dim
     spectra_reg_args['out_dim'] = len(data_args.prediction_labels_spec) * len(optim_args.quantiles)
     spectra_reg_args['w_dim'] = 0
@@ -288,10 +280,11 @@ def get_model(data_args,
         deepnorm_init(model.dual_former, dual_former_args)
 
         tuner_args.in_dim = (dual_former_args.embed_dim + latent_dim) * 2
+
     
     elif data_args.approach == 'jepa':
         
-        print("Using JEPA with transformer args: ", transformer_args_jepa)
+        print("Using JEPA with transformer args: ", transformer_args_lightspec)
         print("Using projector args: ", projector_args)
         print("Using predictor args: ", predictor_args.get_dict())
 
@@ -301,8 +294,7 @@ def get_model(data_args,
                               loss_args,
                                **moco_args.get_dict()).to(local_rank)
 
-        # model = MultiModalJEPA(light_model.simsiam.encoder, spec_model.encoder, transformer_args_jepa,
-        # lc_reg_args, spectra_reg_args, loss_args, freeze_backbone=data_args.freeze_backbone).to(local_rank)
+        
         
         # Apply DeepNorm initialization to the JEPA transformer components
         deepnorm_init(model.vicreg_predictor, transformer_args_jepa)
@@ -310,7 +302,6 @@ def get_model(data_args,
     elif data_args.approach == 'moco':
 
         print("Using MoCo with transformer args: ", transformer_args_lightspec)
-        # model = MultiTaskMoCo(moco, moco_pred_args.get_dict()).to(local_rank)
         model = MultimodalMoCo(spec_model.encoder, light_model.simsiam.encoder,
                              transformer_args_lightspec,
                              **moco_args.get_dict()).to(local_rank)
@@ -332,7 +323,7 @@ def get_model(data_args,
         exp_num = os.path.basename(data_args.checkpoint_path).split('.')[0].split('_')[-1]
         print(datetime_dir)
         print("loading checkpoint from: ", data_args.checkpoint_path)
-        moco = load_checkpoints_ddp(model, data_args.checkpoint_path)
+        model = load_checkpoints_ddp(model, data_args.checkpoint_path)
         print("loaded checkpoint from: ", data_args.checkpoint_path)
         
 
@@ -341,10 +332,6 @@ def get_model(data_args,
     
     model = DDP(model, device_ids=[local_rank], find_unused_parameters=True)
     
-    # if load_individuals:
-    #     light_model.load_state_dict(light_model_state)
-    #     spec_model.load_state_dict(spec_model_state)
-
     num_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print(f"Number of trainble parameters: {num_params}")
     all_params = sum(p.numel() for p in model.parameters())

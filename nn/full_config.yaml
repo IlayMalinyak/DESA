@@ -29,7 +29,7 @@ Data:
   target_norm: 'solar'
   test_run: False
   create_umap: False
-  load_checkpoint: False
+  load_checkpoint: True
   masked_transform: False
   use_acf: True
   use_fft: True
@@ -44,16 +44,6 @@ Data:
   approach: "dual_former"
   only_main_seq: False
   calc_variance: True
-  # checkpoint_path: '/data/lightSpec/logs/lightspec_2025-04-18/lightspec_dual_former_latent_full.pth'
-  # checkpoint_path: '/data/lightSpec/logs/lightspec_2025-04-15/lightspec_dual_former_teff_logg_prot_duality_loss_freeze_backbone_latent_2.pth'
-  # checkpoint_path: '/data/lightSpec/logs/lightspec_2025-04-19/lightspec_dual_former_latent_full_proj_covloss.pth'
-  # checkpoint_path: '/data/lightSpec/logs/lightspec_2025-04-19/lightspec_dual_former_latent_full_proj_covloss_mainseq.pth'
-  # checkpoint_path: '/data/lightSpec/logs/lightspec_2025-04-20/lightspec_dual_former_6_latent_proj_covloss_2.pth'
-  # checkpoint_path: '/data/lightSpec/logs/lightspec_2025-04-22/lightspec_dual_former_6_latent_proj_covloss_giants.pth'
-  # checkpoint_path: '/data/lightSpec/logs/lightspec_2025-05-21/lightspec_compare_moco.pth'
-  # checkpoint_path: '/data/lightSpec/logs/lightspec_2025-05-21/lightspec_compare_jepa.pth'
-  # checkpoint_path: '/data/lightSpec/logs/lightspec_2025-05-23/lightspec_compare_moco.pth'
-  # checkpoint_path: '/data/lightSpec/logs/lightspec_2025-05-26/lightspec_compare_simsiam.pth'
 
   checkpoint_path: '/data/lightSpec/logs/lightspec_2025-05-16/lightspec_dual_former_6_latent_giants_ablation_2.pth'
 
@@ -107,72 +97,6 @@ AstroConformer_lc:
   spec_checkpoint_path: '/data/lightSpec/logs/exp6/astroconf_spectra_3.pth'
 
 
-AstroEncoderDecoder:
-  # Model
-  in_channels: 1
-  encoder: ["mhsa_pro", "conv", "mhsa_pro"]
-  decoder: ["mhsa_decoder",  "conv", "mhsa_decoder"]
-  timeshift: false
-  num_layers: 6
-  num_decoder_layers: 6
-  stride: 2
-  encoder_dim: 512
-  decoder_dim: 512
-  num_heads: 4
-  kernel_size: 3
-  dropout_p: 0.2
-  output_dim: 3
-  norm: "postnorm"
-  load_spec_checkpoint: False
-  spec_checkpoint_path: '/data/lightSpec/logs/exp6/astroconf_spectra_3.pth'
-
-MultiEncoder_lc:
-  # Model
-  in_channels: 2
-  num_layers: 8
-  stride: 1
-  encoder_dims: [32,64,128,256,512,2048]
-  kernel_size: 3
-  dropout_p: 0.3
-  output_dim: 2
-  beta: 1
-  avg_output: True
-  load_checkpoint: True
-  checkpoint_num: 1
-  activation: "sine"
-  sine_w0: 1.0
-  checkpoint_path: '/data/lightSpec/logs/light_2025-02-11/MultiEncoder_lc_3.pth'
-
-
-Conformer_lc:
-  encoder: ["mhsa_pro", "conv", "ffn"]
-  timeshift: false
-  num_layers: 6
-  stride: 2
-  encoder_dim: 2048
-  num_heads: 8
-  kernel_size: 3
-  dropout_p: 0.2
-  norm: "shortcut"
-
-MultiTaskSimSiam_lc:
-  in_channels: 2
-  num_layers: 8
-  stride: 1
-  encoder_dims: [32, 64,128,256,512,2048]
-  transformer_layers: 4
-  kernel_size: 3
-  dropout_p: 0.2
-  avg_output: True
-  output_dim: 1
-  num_quantiles: 5
-  beta: 1
-  load_checkpoint: True
-  checkpoint_num: 1
-  activation: "sine"
-  sine_w0: 1.0
-  checkpoint_path: "/data/lightSpec/logs/light_2025-03-03/MultiEncoder_lc_2.pth"
-
 MultiTaskRegressor_spec:
   backbone: 'cnn'
   in_channels: 1
@@ -205,35 +129,6 @@ Conformer_spec:
   deepnorm: True
   beta: 0.866    # Calculated as (num_layers/6)^(-0.5) for 8 layers
 
-
-MultiEncoder_combined:
-  # Model
-  in_channels: 3
-  num_layers: 8
-  stride: 1
-  encoder_dims: [32,64,128,256,512,2048]
-  kernel_size: 3
-  dropout_p: 0.3
-  output_dim: 2
-  beta: 1
-  avg_output: True
-  load_checkpoint: True
-  checkpoint_num: 1
-  activation: "sine"
-  sine_w0: 1.0
-  checkpoint_path: '/data/lightSpec/logs/combined_2025-02-12/lightspec_1.pth'
-
-
-Conformer_combined:
-  encoder: ["mhsa_pro", "conv", "ffn"]
-  timeshift: false
-  num_layers: 6
-  stride: 2
-  encoder_dim: 2048
-  num_heads: 8
-  kernel_size: 3
-  dropout_p: 0.2
-  norm: "shortcut"
 
 MultiEncoder_lightspec:
   # Model
@@ -277,33 +172,6 @@ Transformer_lightspec:
   deepnorm: True
   beta: 1.225    # Calculated as (num_layers/6)^(-0.5) for 2 layers
 
-Transformer_jepa:
-  in_channels: 1
-  num_layers: 4
-  encoder_dim: 512
-  dropout_p: 0.2
-  num_heads: 8
-  dropout: 0.0
-  output_dim: 512
-  pooling_method: 'mean'
-  num_quantiles: 1
-  checkpoint_num: 1
-  load_checkpoint: False
-  deepnorm: True
-  beta: 0.866    # Calculated as (num_layers/6)^(-0.5) for 4 layers
-
-
-Conformer_lightspec:
-  encoder: ["mhsa_pro", "conv", "ffn"]
-  timeshift: false
-  num_layers: 4
-  stride: 2
-  encoder_dim: 256
-  num_heads: 8
-  kernel_size: 3
-  dropout_p: 0.2
-  output_dim: 256
-  norm: "shortcut"
 
 dual_former:
   input_dim: 1
@@ -324,44 +192,7 @@ dual_former:
   latent_dim: 0
   attention_type: "cross_self" # Options: cross, self, cross_self
   projection_type: "transpose" # Options: transpose, normal
-  
     
-
-CNNEncoder:
-  # Model
-  in_channels: 1
-  num_layers: 8
-  stride: 1
-  encoder_dims: [32,64,128,256,512]
-  kernel_size: 3
-  dropout_p: 0.2
-  output_dim: 2
-  beta: 1
-  load_checkpoint: True
-  avg_output: True
-  checkpoint_num: 2
-  activation: "sine"
-  sine_w0: 1.0
-  load_checkpoint: True
-  checkpoint_path: '/data/lightSpec/logs/light_2024-11-27/CNNEncoder_lc_1.pth'
-
-CNNEncoderDecoder_lc:
-  # Model
-  in_channels: 1
-  num_layers: 8
-  stride: 1
-  encoder_dims: [32,64,128,256,512]
-  kernel_size: 3
-  dropout_p: 0.3
-  output_dim: 2
-  beta: 1
-  load_checkpoint: True
-  checkpoint_num: 1
-  activation: "sine"
-  sine_w0: 1.0
-  avg_output: True
-  checkpoint_path: '/data/lightSpec/logs/light_2025-02-04/CNNEncoderDecoder_lc_2.pth'
-
 
 
 MoCo:
@@ -425,30 +256,6 @@ MultiModalSimSiam:
   dropout: 0.2
   freeze_backbone: True
 
-CNNBackbone:
-  # Model
-  in_channels: 1
-  num_layers: 8
-  stride: 1
-  encoder_dims: [64,128,256,512]
-  kernel_size: 3
-  dropout_p: 0.3
-  beta: 1
-  avg_output: True
-  activation: "silu"
-  sine_w0: 1.0
-  load_checkpoint: False
-
-conv_args:
-  in_channels: 1
-  num_layers: 8
-  stride: 1
-  encoder_dims: [64,128,256,512]
-  kernel_size: 3
-  dropout_p: 0.3
-  beta: 1
-  avg_output: True
-  activation: "silu"
   
 Optimization:
   # Optimization

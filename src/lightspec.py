@@ -343,18 +343,24 @@ if __name__ == "__main__":
 
     print(f"Configuration (with model structure) saved at {config_save_path}.")
 
-    fit_res = trainer.fit(num_epochs=data_args.num_epochs, device=local_rank,
-                            early_stopping=20, best='loss', conf=True) 
-    output_filename = f'{data_args.log_dir}/{datetime_dir}/{exp_num}_fit_res.json'
-    with open(output_filename, "w") as f:
-        json.dump(fit_res, f, indent=2)
-    fig, axes = plot_fit(fit_res, legend=exp_num, train_test_overlay=True)
-    plt.savefig(f"{data_args.log_dir}/{datetime_dir}/fit_{exp_num}.png")
-    plt.clf()
+    if data_args.mode == 'train': 
+        print("Starting training...")
+        fit_res = trainer.fit(num_epochs=data_args.num_epochs, device=local_rank,
+                                early_stopping=20, best='loss', conf=True) 
+        output_filename = f'{data_args.log_dir}/{datetime_dir}/{exp_num}_fit_res.json'
+        with open(output_filename, "w") as f:
+            json.dump(fit_res, f, indent=2)
+        fig, axes = plot_fit(fit_res, legend=exp_num, train_test_overlay=True)
+        plt.savefig(f"{data_args.log_dir}/{datetime_dir}/fit_{exp_num}.png")
+        plt.clf()
 
     torch.cuda.empty_cache()
     torch.distributed.barrier()
 
+    print("Starting predictions...")
+
+    # uncomment to run tests on all datasets
+    
     # predict_and_save_dl(train_dataloader, local_rank, 'train', trainer)
     # predict_and_save_dl(val_dataloader, local_rank, 'val', trainer)
     predict_and_save_dl(test_dataloader, local_rank, 'test', trainer)

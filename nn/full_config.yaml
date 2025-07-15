@@ -1,7 +1,7 @@
 Data:
   # Basics
-  log_dir: '/data/lightSpec/logs'
-  exp_num: lightspec_carbon
+  log_dir: '/data/DESA/logs'
+  exp_num: lightspec_reproduce
   light_model_name: "DoubleInputRegressor"
   spec_model_name: "MultiTaskRegressor"
   combined_model_name: "MultiEncoder"
@@ -44,8 +44,9 @@ Data:
   approach: "dual_former"
   only_main_seq: False
   calc_variance: True
+  model: 'inference'
 
-  checkpoint_path: '/data/lightSpec/logs/lightspec_2025-05-16/lightspec_dual_former_6_latent_giants_ablation_2.pth'
+  checkpoint_path: '/data/DESA/logs/lightspec_2025-05-16/lightspec_dual_former_6_latent_giants_ablation_2.pth'
 
 DoubleInputRegressor_lc:
   encoder_only: True
@@ -55,7 +56,7 @@ DoubleInputRegressor_lc:
   output_dim: 1
   num_quantiles: 5
   dropout_p: 0.3  
-  checkpoint_path: '/data/lightSpec/logs/light_2025-03-19/DoubleInputRegressor_lc_3_ssl.pth'
+  checkpoint_path: '/data/DESA/logs/light_2025-03-19/DoubleInputRegressor_lc_3_ssl.pth'
 
 CNNEncoder_lc:
   # Model
@@ -72,7 +73,7 @@ CNNEncoder_lc:
   activation: "sine"
   sine_w0: 1.0
   avg_output: True
-  checkpoint_path: '/data/lightSpec/logs/light_2024-11-27/CNNEncoder_lc_1.pth'
+  checkpoint_path: '/data/DESA/logs/light_2024-11-27/CNNEncoder_lc_1.pth'
 
 
 AstroConformer_lc:
